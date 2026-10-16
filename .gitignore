@@ -10,9 +10,6 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
-# Internal project documents (BRD/TSD/EOD). The GitHub repo is public; remove this line only if they may be published.
-docs/
-
 # Editors and OS
 .vscode/
 .idea/
