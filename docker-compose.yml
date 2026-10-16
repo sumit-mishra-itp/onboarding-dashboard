@@ -1,0 +1,44 @@
+# Local development. For hosting use docker-compose.prod.yml.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: eod
+      POSTGRES_PASSWORD: eod
+      POSTGRES_DB: eod
+    ports: ["5433:5432"]  # host 5433: 5432 is often taken by a local Postgres
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "eod"]
+      interval: 2s
+      retries: 30
+
+  api:
+    build: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    user: root  # bind mount: the dev container writes __pycache__ into your checkout
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: postgresql://eod:eod@db:5432/eod
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      AI_PROVIDER: ${AI_PROVIDER:-groq}
+      AI_MODEL: ${AI_MODEL:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      WATCHFILES_FORCE_POLLING: "true"  # --reload on Windows bind mounts
+    volumes: [./backend:/app]
+    ports: ["8000:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+
+  web:
+    build: { context: ./web, target: dev }
+    environment:
+      API_URL: http://api:8000
+    volumes: [./web:/app, /app/node_modules]
+    ports: ["5173:5173"]
+    depends_on: [api]
+
+volumes:
+  pgdata:

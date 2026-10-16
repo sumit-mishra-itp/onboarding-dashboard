@@ -1,0 +1,20 @@
+# Secrets: real keys live only in .env (copy .env.example)
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Internal project documents (BRD/TSD/EOD). The GitHub repo is public; remove this line only if they may be published.
+docs/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
